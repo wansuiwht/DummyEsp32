@@ -1,0 +1,5 @@
+.pio*
+*.gch
+test
+credentials.h
+lib
