@@ -24,6 +24,7 @@ DummyHttpCmdHandler(){};
   {
     String c =  server.arg("cmd");
     cmd.ExecCmd(c);
+    Serial.println(c);
     Serial.setTimeout(10000);
     String read = Serial.readStringUntil('\n');
     server.send(200, "text/javascript; charset=utf-8","{\"code\":0,\"msg\":\"" + read +"\"}");

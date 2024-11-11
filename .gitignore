@@ -3,7 +3,7 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
-
+.pio/Build
 # Other files and folders
 .settings/
 

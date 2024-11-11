@@ -88,7 +88,7 @@ void WiFiInit()
     {
       log_e("热点创建失败.");
       //创建失败了，重启ESP
-      ESP.restart();
+     // ESP.restart();
     }
     apIp = WiFi.softAPIP();
     Serial.print("AP IP address: ");
@@ -191,16 +191,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     break;
   }
 }
+HardwareSerial S(2);
 // Setup everything to make the webserver work.
 void setup(void)
 {
   delay(3000); // wait for serial monitor to start completely.
-
+  TRACE("Starting WebServer\n");
   // 调试信息串口
   Serial.begin(115200);
   Serial.setDebugOutput(false);
   // 与STM32通信
-  Serial2.begin(115200);
+  S.begin(115200,SERIAL_8N1,15,16);
   // 开启存储
   preferences.begin("Dummy", false);
   TRACE("Starting WebServer\n");
@@ -219,7 +220,7 @@ void setup(void)
   TRACE("Register service handlers...\n");
 
   // serve a built-in htm page
-  server.on("/$index.htm", []()
+  server.on("/index.htm", []()
             { server.send(200, "text/html", FPSTR(uploadContent)); });
 
   TRACE("Register file system handlers...\n");
