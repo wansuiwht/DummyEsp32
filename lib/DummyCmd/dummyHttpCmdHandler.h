@@ -24,10 +24,10 @@ DummyHttpCmdHandler(){};
   {
     String c =  server.arg("cmd");
     cmd.ExecCmd(c);
-    Serial.println(c);
-    Serial.setTimeout(10000);
-    String read = Serial.readStringUntil('\n');
-    server.send(200, "text/javascript; charset=utf-8","{\"code\":0,\"msg\":\"" + read +"\"}");
+    Serial.println(c.c_str());
+    //Serial1.setTimeout(10000);
+   //String read = Serial1.readStringUntil('\n');
+    server.send(200, "text/javascript; charset=utf-8","{\"code\":0,\"msg\":\"ok\"}");
     return true;
   } // handle()
 };

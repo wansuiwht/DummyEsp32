@@ -36,7 +36,9 @@ bool DummyCmd::Reboot(){
     return SendCmd("!REBOOT");
 }
 bool DummyCmd::SendCmd(String cmd){
-    Serial2.write(cmd.c_str());
+   Serial1.write(cmd.c_str());
+   //Serial1.write("#SET_IP ap\n");
+    Serial1.println();
     return true;
 }
 bool DummyCmd::SetDCEKP(int value,int node){
