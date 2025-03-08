@@ -1,39 +1,23 @@
 # DummyEsp32
 
 #### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+这个项目用于[稚晖的dummy-root](https://github.com/peng-zhihui/Dummy-Robot)中的esp32芯片，电机和ref版的固件是基于[木子](https://gitee.com/switchpi/dummy)版进行了修改。开发环境是vscode+platformIO.如果不用ros的功能，可以在windows下开发（将platfromio.ini中的lib_deps = 
+      https://github.com/micro-ROS/micro_ros_platformio去掉即可)，如果使用ros，需要在linux下开发。
+使用vue和element ui开发的前端界面。3D框架使用了aframe,如果使用nginx自己配置一个https。还可以投到VR头盔中。
+#### 截图
+![screen](imges/screen.png)
+![screen2](imges/screen2.png)
 
-#### 软件架构
-软件架构说明
 
+#### 功能
 
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  Dummy IP地址显示：Dummy上电后，没设置wifi时。ESP32会处于AP模式，用手机或电脑可搜索到名称为DummyEsp32的热点，然后在浏览器中输入Dummy屏幕上显示的ip地址，可打开wifi设置页面。输入wifi的帐号和密码后，Dummy会自动重启并连接到设置的wifi。屏幕上会显示会sta模式和dummy的ip地址。在浏览器中输入ip地址，即可打开控制台界面。
+2.  实现了简单的示教功能。
+3.  实现了PID的设置功能。
+4.  实现了姿态的实时显示功能。
+5.  集成了microros库，利用esp32的wifi能力，可实现无线与ros2系统对接。
+   
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1.  UI的代码在builtinfiles.h文件中，模型文件目前是在七牛云，你也可以自己配置个nginx放在本地。

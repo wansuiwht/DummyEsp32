@@ -6,7 +6,9 @@ bin-release/
 .pio/Build
 # Other files and folders
 .settings/
-
+.pio/
+.vscode/
+.gitee/
 # Executables
 *.swf
 *.air
