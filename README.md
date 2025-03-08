@@ -2,7 +2,8 @@
 
 #### 介绍
 这个项目用于[稚晖的dummy-root](https://github.com/peng-zhihui/Dummy-Robot)中的esp32芯片，电机和ref版的固件是基于[木子](https://gitee.com/switchpi/dummy)版进行了修改。开发环境是vscode+platformIO.如果不用ros的功能，可以在windows下开发（将platfromio.ini中的lib_deps = 
-      https://github.com/micro-ROS/micro_ros_platformio去掉即可)，如果使用ros，需要在linux下开发。
+      https://github.com/micro-ROS/micro_ros_platformio去掉，然后删除掉ros部分的代码即可)。
+如果使用ros，需要在linux下开发编译。
 使用vue和element ui开发的前端界面。3D框架使用了aframe,如果使用nginx自己配置一个https。还可以投到VR头盔中。
 #### 截图
 ![screen](imges/screen.png)
@@ -21,3 +22,26 @@
 #### 使用说明
 
 1.  UI的代码在builtinfiles.h文件中，模型文件目前是在七牛云，你也可以自己配置个nginx放在本地。
+#### 重要说明
+如果是在linux下编译，使用了ros2功能。
+1、microros库里的set_microros_transports函数，与本项目的wifi功能有冲突。所以我单独写了一个set_microros_transports函数。代码如下：
+```c++
+static inline void set_microros_transports(IPAddress agent_ip,uint16_t agent_port){
+    static struct micro_ros_agent_locator locator;
+    locator.address = agent_ip;
+    locator.port = agent_port;
+
+    rmw_uros_set_custom_transport(
+        false,
+        (void *) &locator,
+        platformio_transport_open,
+        platformio_transport_close,
+        platformio_transport_write,
+        platformio_transport_read
+    );
+}
+```
+将这段代码放到下图的位置中即可
+![set_microros_transports](imges/set_microros_transport.png)
+
+2、ref和42、35电机的固件，我是在windows下编译的。
