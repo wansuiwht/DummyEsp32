@@ -6,7 +6,7 @@
 开发环境是vscode+platformIO.如果不用ros的功能，可以在windows下开发（将platfromio.ini中的lib_deps = 
       https://github.com/micro-ROS/micro_ros_platformio去掉，然后删除掉ros部分的代码即可)。
 如果使用ros，需要在linux下开发编译。
-使用vue和element ui开发的前端界面。3D框架使用了aframe,如果使用nginx自己配置一个https。还可以投到VR头盔中。
+使用vue和element ui开发的前端界面。3D框架使用了aframe,如果使用nginx自己配置一个https。还可以投到VR头盔中。  
 模型使用的是[Arthur.zhu大佬](https://www.bilibili.com/video/BV1Gy421h7MS/?spm_id_from=333.337.search-card.all.click&vd_source=37f58ab2bcacdba59a23cce992e5fa17)开源的V2版本
 #### 截图
 ![screen](imges/screen.png)
