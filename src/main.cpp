@@ -101,6 +101,7 @@ void subscription_callback(const void *msgin)
   Serial.println(micro_ros_string_utilities_get_c_str(msg->data));
   Serial.println("lll");
 }
+//
 void StartRosNode(){
    
   agent_ip = preferences.getString("agent_ip", "");
@@ -211,11 +212,12 @@ void handleSysInfo()
   result += ("\"ip\":\"" + WiFi.localIP().toString() + "\"\n,");
   result += "\"udpPort\":9999\n,";
   result += ("\"rosAgentIp\": \""+ ros_ip + "\"\n,");
-  result += ("\"rosAgentPort\": " + String(ros_port) + "\n,");
+  result += ("\"rosAgentPort\": " + String(ros_port) + "\n");
   result += "}";
 
   server.sendHeader("Cache-Control", "no-cache");
-  server.send(200, "text/javascript; charset=utf-8", result);
+  //server.send(200, "text/javascript; charset=utf-8", result);
+  server.send(200, "application/json; charset=utf-8", result);
 }
 void InitWebServer(){
 // Ask for the current time using NTP request builtin into ESP firmware.

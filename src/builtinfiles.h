@@ -126,6 +126,36 @@ static const char uploadContent[] PROGMEM =
 											<el-input v-model="ssid" placeholder="请输入内容" size="mini"></el-input>
 										</el-col>
 										<el-col :span="2">
+										<div class="infoLabel">
+											密码
+										</div>
+										</el-col>
+										<el-col :span="6">
+											<el-input v-model="wifiPassword" placeholder="请输入内容" size="mini"></el-input>
+										</el-col>
+										<el-col :span="8">
+											<el-button @click="resetWifi" type="primary" size="mini">重置WIFI</el-button>
+										</el-col>
+										<el-col :span="3">
+										<div class="infoLabel">
+											ROS Agent Ip
+										</div>
+										</el-col>
+										<el-col :span="5">
+											<el-input v-model="agentIp" placeholder="请输入内容" size="mini"></el-input>
+										</el-col>
+										<el-col :span="4">
+										<div class="infoLabel">
+											ROS Agent Port
+										</div>
+										</el-col>
+										<el-col :span="4">
+											<el-input v-model="agentPort" placeholder="请输入内容" size="mini"></el-input>
+										</el-col>
+										<el-col :span="8">
+											<el-button @click="startRos" type="primary" size="mini">开启Ros节点</el-button>
+										</el-col>
+										<el-col :span="2">
 											<div class="infoLabel">
 												UDP端口
 											</div>
@@ -141,21 +171,6 @@ static const char uploadContent[] PROGMEM =
 										<el-col :span="6">
 											<el-input v-model="tcpPort" placeholder="请输入内容" size="mini"></el-input>
 										</el-col>
-										<el-col :span="2">
-										<div class="infoLabel">
-											密码
-										</div>
-										</el-col>
-										<el-col :span="6">
-											<el-input v-model="wifiPassword" placeholder="请输入内容" size="mini"></el-input>
-										</el-col>
-										
-										<el-col :span="8">
-											<el-button @click="resetWifi" type="primary" size="mini">重置WIFI</el-button>
-										</el-col>
-									</el-row>
-									<el-row>
-										
 									</el-row>
 								</el-card>
 								<el-card class="box-card" style="margin-top: 6px; height: 110px">
@@ -577,6 +592,8 @@ static const char uploadContent[] PROGMEM =
 					data: function() {
 						return {
 							visible: false,
+							agentIp: "192.168.0.110",
+							agentPort : 2018,
 							dummyLog: "started ",
 							dummyCmdList: [],
 							cmdListRunMode: '1',
@@ -701,6 +718,8 @@ static const char uploadContent[] PROGMEM =
 								this.wifiPassword = res.data.password;
 								this.udpPort = res.data.udpPort;
 								this.tcpPort = res.data.tcpPort;
+								this.agentIp = res.data.rosAgentIp;
+								this.agentPort = res.data.rosAgentPort;
 								this.initWebsocket(this.ip)
 							})
 						},
@@ -859,14 +878,29 @@ static const char uploadContent[] PROGMEM =
 								clearCmdList(){
 									this.dummyCmdList = [];
 								},
+								startRos(){
+									axios.get(`/startRosNode?agentIp=${this.agentIp}&agentPort=${this.agentPort}`).then(res=>{
+										console.log(res)
+									})
+								},
+								sendCmd(cmd){
+									return new Promise((resolve, reject) => {
+										axios.get('/Dummy?cmd=' + cmd).then((res) => {
+											resolve(res)
+										})
+									})
+									
+								},
 								runCmdList(){
 									if (this.dummyCmdList.length < 1) return;
 									if (this.cmdExecFlag == '停止'){
 										this.cmdExecFlag = '执行'
 										this.cmdIndex = 0
+										this.sendCmd('%23AUTO_SEND_POS false')
 										return
 									}
 									this.execRunList()
+									this.sendCmd('%23AUTO_SEND_POS true')
 								},
 								execRunList(){
 									if (this.cmdIndex >= this.dummyCmdList.length) this.cmdIndex  = 0;
@@ -874,7 +908,6 @@ static const char uploadContent[] PROGMEM =
 									axios.get(cmd).then(res=>{
 										this.cmdExecFlag = '停止'
 									})
-									
 								},
 								addToCommandList() {
 									let cmd =`>${this.J1Pos},${this.J2Pos},${this.J3Pos},${this.J4Pos},${this.J5Pos},${this.J6Pos},${this.speed}`
@@ -887,15 +920,9 @@ static const char uploadContent[] PROGMEM =
 									console.log(this.$refs["j1"].setAttribute('rotation', '0 90 0'))
 								},
 								getPID() {
-									axios.get('/Dummy?cmd=%23GETKP').then(res => {
-										console.log(res)
-									});
-									axios.get('/Dummy?cmd=%23GETKI').then(res => {
-										console.log(res)
-									});
-									axios.get('/Dummy?cmd=%23GETKD').then(res => {
-										console.log(res)
-									});
+									this.sendCmd('%23GETKP')
+									this.sendCmd('%23GETKI')
+									this.sendCmd('%23GETKD')
 								},
 								resetWifi(){
 									axios.get(`/setWifi?ssid=${this.ssid}&pass=${this.wifiPassword}`).then(res=>{
@@ -906,24 +933,14 @@ static const char uploadContent[] PROGMEM =
 									let cmdKp = `%23SET_DCE_KP ${node} ${this.motorPid[node -1].kp}`
 									let cmdKi = `%23SET_DCE_KI ${node} ${this.motorPid[node -1].ki}`
 									let cmdKd = `%23SET_DCE_KD ${node} ${this.motorPid[node -1].kd}`
-									axios.get('/Dummy?cmd=' + cmdKp).then((resp) => {
-										axios.get('/Dummy?cmd=' + cmdKi).then((resi) => {
-											axios.get('/Dummy?cmd=' + cmdKd).then((resd) => {
-												console.log(resd)
-											}).catch((err) => {
-												console.log(err)
-											})
-										}).catch((err) => {
-											console.log(err)
+									this.sendCmd(cmdKp).then(res=>{
+										this.sendCmd(cmdKi).then(resi=>{
+											this.sendCmd(cmdKd)
 										})
-									}).catch((err) => {
-										console.log(err)
 									})
 								},
 								refreshJointsL(){
-									axios.get('/Dummy?cmd=%23GETLPOS').then(res=>{
-										console.log(res)
-									})
+									this.sendCmd('%23GETLPOS')
 								},
 								resetJointsL(){
 									this.X = 0;
@@ -937,9 +954,7 @@ static const char uploadContent[] PROGMEM =
 								},
 								sendXYZ(){
 									let cmdMoveL = `@${this.X},${this.Y},${this.Z},${this.A},${this.B},${this.C},${this.speed}`
-									axios.get('/Dummy?cmd=' + cmdMoveL).then(res=>{
-										console.log(res)
-									})
+									this.sendCmd(cmdMoveL)
 								},
 								addXYZToCommandList(){
 									let cmd= `@${this.X},${this.Y},${this.Z},${this.A},${this.B},${this.C},${this.speed}`;
