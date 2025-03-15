@@ -56,3 +56,9 @@ bool DummyCmd::SetDCEKD(int value,int node){
     size_t len = snprintf(cmd, sizeof(cmd), "#SET_DCE_KD %d %d", value,node);
     return SendCmd(cmd);
 }
+bool DummyCmd::GetJLA(){
+    return SendCmd("#GETJOINTSLIMITA");
+}
+bool DummyCmd::GetJLB(){
+    return SendCmd("#GETJOINTSLIMITB");
+}

@@ -7,6 +7,8 @@
 #include <Preferences.h>
 #include "AsyncUDP.h"
 #include "dummyHttpCmdHandler.h"
+#include "dummyUdpCmdHandler.h"
+#include "dummyCmd.h"
 #include "WebSocketsServer.h"
 // ros
 #include <micro_ros_platformio.h>
@@ -17,6 +19,7 @@
 #include <micro_ros_utilities/string_utilities.h>
 #include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/string.h>
+#include <sstream>
 // 用于保存wifi信息
 Preferences preferences;
 // Udp服务端
@@ -25,9 +28,20 @@ AsyncUDP udp;
 WebSocketsServer webSocket = WebSocketsServer(81);
 // WebServer服务器
 WebServer server(80);
+// UDP CMD
+DummyUdpCmdHandler udpCmd;
+DummyCmd dummyCmd;
+bool useJoystick = false;
 
+struct JointLimit {
+  float min = 0;
+  float max = 0;
+};
 String ssid;
 String pass;
+float jointsPos[6]{0};
+float jointsCmd[6]{0};
+JointLimit jointLimit[6];
 
 IPAddress ip;
 String agent_ip;
@@ -323,12 +337,17 @@ void UdpInit()
 {
   if (udp.listen(9999))
   {
+    udpCmd.SetJoints(jointsCmd);
     udp.onPacket([](AsyncUDPPacket packet)
                  {
-                  //转发给STM32
-                  Serial2.write(packet.data(),packet.length());
-                  Serial2.println();
-                  packet.print("sent to Stm32"); });
+                  udpCmd.ParseCmd(packet.data(),packet.length());
+                  // //转发给STM32
+                  // Serial1.write(packet.data(),packet.length());
+                  // Serial1.println();
+                  // //print debug info
+                  // Serial.write(packet.data(),packet.length());
+                  // packet.print("sent to Stm32"); });
+                 });
   }
 }
 /*******************************************************************************************/
@@ -391,6 +410,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     break;
   }
 }
+void setJointsLimit(String s,int i){
+  Serial.println(s);
+  std::istringstream iss(s.c_str());
+  std::string token;
+  while (iss >> token) {  // 自动跳过空格并提取单词
+    jointLimit[i].min = std::stof(token);
+    iss >> token;
+    jointLimit[i].max = std::stof(token);
+    i++;
+  }
+}
 /************************************************************************************************ */
 // STM32串口回调函数
 void onSerial2Receive()
@@ -403,11 +433,31 @@ void onSerial2Receive()
     read += c;
     if (c == '\n')
     {
+      //recode pos
+      if (read.startsWith("pos")){
+        std::istringstream iss(read.substring(3).c_str());
+        std::string token;
+        int i = 0;
+        while (iss >> token) {  // 自动跳过空格并提取单词
+          jointsPos[i] = std::stof(token);
+          i++;
+        }
+      }
+    
       webSocket.sendTXT(websocketClientId, read);
       Serial.println(read);
       read = "";
     }
   }
+    //remember limit
+    if (read.startsWith("JLA")){
+      String v = read.substring(3);
+      setJointsLimit(v,0);
+    }
+    if (read.startsWith("JLB")){
+      String v = read.substring(3);
+      setJointsLimit(v,3);
+    }
   webSocket.sendTXT(websocketClientId, read);
   Serial.println(read);
 }
@@ -436,15 +486,75 @@ void setup(void)
  
   Serial.println("usupport compeled");
   Serial.println("ros init completed");
+  
   //UdpInit();
   TRACE("open <http://%s> or <http://%s>\n", WiFi.getHostname(), WiFi.localIP().toString().c_str());
+  dummyCmd.GetJLA();
+  dummyCmd.GetJLB();
+  dummyCmd.GetJPos();
 } // setup
+int sendCmdCount = 0;
+void checkJoystickCmd(){
+  if (sendCmdCount< 50){
+    sendCmdCount++;
+    return ;
+  }
+  sendCmdCount = 0;
+  if (jointsCmd[0] != 0 ||
+      jointsCmd[1] != 0 ||
+      jointsCmd[2] != 0 ||
+      jointsCmd[3] != 0 ||
+      jointsCmd[4] != 0 ||
+      jointsCmd[5] != 0 
+    ){
+     
+      std::string c(">");
+      jointsPos[0] +=  jointsCmd[0];
+      jointsPos[0] = jointsPos[0] > jointLimit[0].max ? jointLimit[0].max : jointsPos[0];
+      jointsPos[0] = jointsPos[0] <jointLimit[0].min ? jointLimit[0].min : jointsPos[0];
 
+      jointsPos[1] +=  jointsCmd[1];
+      jointsPos[1] = jointsPos[1] > jointLimit[1].max ? jointLimit[1].max : jointsPos[1];
+      jointsPos[1] = jointsPos[1] <jointLimit[1].min ? jointLimit[1].min : jointsPos[1];
+      
+      jointsPos[2] +=  jointsCmd[2];
+      jointsPos[2] = jointsPos[2] > jointLimit[2].max ? jointLimit[2].max : jointsPos[2];
+      jointsPos[2] = jointsPos[2] <jointLimit[2].min ? jointLimit[2].min : jointsPos[2];
+
+      jointsPos[3] +=  jointsCmd[3];
+      jointsPos[3] = jointsPos[3] > jointLimit[3].max ? jointLimit[3].max : jointsPos[3];
+      jointsPos[3] = jointsPos[3] <jointLimit[3].min ? jointLimit[3].min : jointsPos[3];
+
+      jointsPos[4] +=  jointsCmd[4];
+      jointsPos[4] = jointsPos[4] > jointLimit[4].max ? jointLimit[4].max : jointsPos[4];
+      jointsPos[4] = jointsPos[4] <jointLimit[4].min ? jointLimit[4].min : jointsPos[4];
+
+      jointsPos[5] +=  jointsCmd[5];
+      jointsPos[5] = jointsPos[5] > jointLimit[5].max ? jointLimit[5].max : jointsPos[5];
+      jointsPos[5] = jointsPos[5] <jointLimit[5].min ? jointLimit[5].min : jointsPos[5];
+      c.append(std::to_string(jointsPos[0]));
+      c.append(",");
+      c.append(std::to_string(jointsPos[1]));
+      c.append(",");
+      c.append(std::to_string(jointsPos[2]));
+      c.append(",");
+      c.append(std::to_string(jointsPos[3]));
+      c.append(",");
+      c.append(std::to_string(jointsPos[4]));
+      c.append(",");
+      c.append(std::to_string(jointsPos[5]));
+      c.append(",80");
+     
+      Serial.println(c.c_str());
+      dummyCmd.ExecCmd(c.c_str());
+    }
+}
 void loop(void)
 {
   server.handleClient();
   webSocket.loop();
   RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+  checkJoystickCmd();
 } // loop
 
 // end.
