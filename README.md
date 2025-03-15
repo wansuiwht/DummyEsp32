@@ -20,11 +20,25 @@
 3.  实现了PID的设置功能。
 4.  实现了姿态的实时显示功能。
 5.  集成了microros库，利用esp32的wifi能力，可实现无线与ros2系统对接。
-   
+6、 实现了手柄控制
 
 #### 使用说明
 
 1.  UI的代码在builtinfiles.h文件中，模型文件目前是在七牛云，你也可以自己配置个nginx放在本地。
+2.  手柄的驱动在joystick文件夹中，先将config.toml配置文件中的ip改为dummy的ip然后运行joystick.exe,然后连接手柄，如下图，表示手柄连接成功
+   ![joystick](imges/joystick_drive.png)
+手柄按键映射   
+
+| 手柄 | Dummy |
+| ---- | ---- |
+| MenuL | Home |
+| MenuR | Reset |
+| X | Start|
+| Y | Stop|
+|JoyX| J1|
+|JoyY| J2|
+其它的看代码吧
+
 #### 重要说明
 如果是在linux下编译，使用了ros2功能。
 1、microros库里的set_microros_transports函数，与本项目的wifi功能有冲突。所以我单独写了一个set_microros_transports函数。代码如下：
