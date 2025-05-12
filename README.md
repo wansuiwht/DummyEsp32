@@ -12,7 +12,10 @@
 ![screen](imges/screen.png)
 ![screen2](imges/screen2.png)
 
-
+#### 新功能预告
+1、添加DH参数动态设置
+2、添加多机协同
+3、添加手机做为手柄控制
 #### 功能
 
 1.  Dummy IP地址显示：Dummy上电后，没设置wifi时。ESP32会处于AP模式，用手机或电脑可搜索到名称为DummyEsp32的热点，然后在浏览器中输入Dummy屏幕上显示的ip地址，可打开wifi设置页面。输入wifi的帐号和密码后，Dummy会自动重启并连接到设置的wifi。屏幕上会显示会sta模式和dummy的ip地址。在浏览器中输入ip地址，即可打开控制台界面。
