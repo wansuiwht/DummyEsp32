@@ -63,3 +63,7 @@ static inline void set_microros_transports(IPAddress agent_ip,uint16_t agent_por
 ![set_microros_transports](imges/set_microros_transport.png)
 
 2、ref和42、35电机的固件，我是在windows下编译的。
+
+#### 技术交流
+如有问题欢迎加群讨论：QQ群:651268948
+![group](images/qq_group.jpg)
