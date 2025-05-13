@@ -69,4 +69,4 @@ static inline void set_microros_transports(IPAddress agent_ip,uint16_t agent_por
 
 #### 技术交流
 如有问题欢迎加群讨论：QQ群:651268948
-![group](images/qq_group.jpg)
+![group](imges/qq_group.jpg)
